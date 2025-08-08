@@ -2,14 +2,14 @@
 pragma solidity ^0.8.29;
 
 import "../IUtilityContract.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ERC1155Airdroper is IUtilityContract, Ownable {
+contract ERC721Airdroper is IUtilityContract, Ownable {
 
     constructor() Ownable(msg.sender) {}
 
-    IERC1155 public token;
+    IERC721 public token;
     uint256 public amount;
     address public treasury;
 
@@ -25,17 +25,15 @@ contract ERC1155Airdroper is IUtilityContract, Ownable {
 
     bool private initialized;
 
-    function airdrop(address[] calldata receivers, uint256[] calldata amounts, uint256[] calldata tokenID) external onlyOwner {
-        require(receivers.length == amounts.length && receivers.length == tokenID.length, ArraysLengthMismatch());
+    function airdrop(address[] calldata receivers, uint256[] calldata tokenID) external onlyOwner {
+        require(receivers.length == tokenID.length, ArraysLengthMismatch());
         require(token.isApprovedForAll(treasury, address(this)), NeedToApproveTokens());
 
-        for(uint256 i = 0; i < amounts.length; i++) {
+        for(uint256 i = 0; i < tokenID.length; i++) {
             token.safeTransferFrom(
                 treasury, 
                 receivers[i], 
-                tokenID[i], 
-                amounts[i], 
-                ""
+                tokenID[i]
             );
         }
 
@@ -46,7 +44,7 @@ contract ERC1155Airdroper is IUtilityContract, Ownable {
 
         (address _token, address _treasury, address _owner) = abi.decode(_initData, (address, address, address));
 
-        token = IERC1155(_token);
+        token = IERC721(_token);
         treasury = _treasury;
 
         Ownable.transferOwnership(_owner);
