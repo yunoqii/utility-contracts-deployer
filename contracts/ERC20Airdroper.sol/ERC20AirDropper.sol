@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.29;
 
-import "../IUtilityContract.sol";
+import "../UtilityContract/AbstractUtilityContract.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ERC20Airdroper is IUtilityContract, Ownable {
+/// @title ERC20Airdroper - Airdrop utility contract for ERC20 tokens
+/// @author yunoqii
+/// @notice This contract allows the owner to airdrop ERC20 tokens to multiple addresses.
+/// @dev Inherits from AbstractUtilityContract and Ownable
+contract ERC20Airdroper is AbstractUtilityContract, Ownable {
+    constructor() payable Ownable(msg.sender) {}
 
-    constructor() Ownable(msg.sender) {}
+    uint256 public constant MAX_AIRDROP_BATCH_SIZE = 300;
 
     IERC20 public token;
     uint256 public amount;
@@ -17,6 +22,7 @@ contract ERC20Airdroper is IUtilityContract, Ownable {
     error ArraysLengthMismatch();
     error NotEnoughApprovedTokens();
     error TransferFailed();
+    error BatchSizeExceeded();
 
     modifier notInitialized() {
         require(!initialized, AlreadyInitialized());
@@ -26,18 +32,25 @@ contract ERC20Airdroper is IUtilityContract, Ownable {
     bool private initialized;
 
     function airdrop(address[] calldata receivers, uint256[] calldata amounts) external onlyOwner {
+        require(receivers.length <= MAX_AIRDROP_BATCH_SIZE, BatchSizeExceeded());
         require(receivers.length == amounts.length, ArraysLengthMismatch());
         require(token.allowance(treasury, address(this)) >= amount, NotEnoughApprovedTokens());
 
-        for (uint256 i = 0; i < receivers.length; i++) {
-            require(token.transferFrom(treasury, receivers[i], amounts[i]), TransferFailed());
-        }
+        address treasuryAddress = treasury;
 
+        for (uint256 i = 0; i < receivers.length;) {
+            require(token.transferFrom(treasuryAddress, receivers[i], amounts[i]), TransferFailed());
+            unchecked {
+                ++i;
+            }
+        }
     }
 
-    function initialize(bytes memory _initData) external notInitialized returns(bool) {
+    function initialize(bytes memory _initData) external override notInitialized returns (bool) {
+        (address _deployManager, address _token, uint256 _amount, address _treasury, address _owner) =
+            abi.decode(_initData, (address, address, uint256, address, address));
 
-        (address _token, uint256 _amount, address _treasury, address _owner) = abi.decode(_initData, (address, uint256, address, address));
+        setDeployManager(_deployManager);
 
         token = IERC20(_token);
         amount = _amount;
@@ -49,12 +62,12 @@ contract ERC20Airdroper is IUtilityContract, Ownable {
         return true;
     }
 
-    function getInitData(address _token, uint256 _amount, address _treasury, address _owner) external pure returns(bytes memory) {
-        return abi.encode(_token, _amount, _treasury, _owner);
+    function getInitData(address _deployManager, address _token, uint256 _amount, address _treasury, address _owner)
+        external
+        pure
+        returns (bytes memory)
+    {
+        return abi.encode(_deployManager, _token, _amount, _treasury, _owner);
     }
-    
-
 }
 
-//["0xdD870fA1b7C4700F2BD7f44238821C26f7392148","0xdD870fA1b7C4700F2BD7f44238821C26f7392148","0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB","0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C"]
-//[250000,31000,19000,250000]
