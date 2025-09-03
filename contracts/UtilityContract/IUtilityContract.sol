@@ -14,8 +14,12 @@ interface IUtilityContract is IERC165 {
 
     /// @dev Reverts if the deploy manager is not set or is invalid
     error DeployManagerCannotBeZero();
+
+    /// @dev Reverts if the caller is not the deploy manager
     error NotDeployManager();
-    error FailedToDeployManager();
+
+    /// @dev Reverts if DeployManager validation failed throw validateDeployManager()
+    error FailedToValidateDeployManager();
 
     // ------------------------------------------------------------------------
     // Functions
@@ -27,5 +31,7 @@ interface IUtilityContract is IERC165 {
     /// @dev This function should be called by the DeployManager after deploying the contract
     function initialize(bytes memory _initData) external returns (bool);
 
+    /// @notice Returns the address of the DeployManager contract
+    /// @return The address of the DeployManager contract
     function getDeployManager() external view returns (address);
 }
