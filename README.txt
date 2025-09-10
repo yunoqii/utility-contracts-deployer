@@ -1,28 +1,43 @@
-REMIX DEFAULT WORKSPACE
+Utility Contracts Deployer
+A collection of essential Solidity utility contracts for blockchain development.
+Overview
+This repository contains a curated set of utility smart contracts that are commonly needed across different blockchain projects. These contracts provide foundational functionality that can be reused and deployed across various EVM-compatible networks.
+Contracts
+Core Utility Contracts
+The repository includes implementations of:
 
-Remix default workspace is present when:
-i. Remix loads for the very first time 
-ii. A new workspace is created with 'Default' template
-iii. There are no files existing in the File Explorer
+Multicall Contract: Batch multiple contract calls into a single transaction
+Proxy Contracts: Minimal proxy implementations for gas-efficient contract deployment
+Registry Contracts: On-chain registries for tracking contract addresses and metadata
+Factory Contracts: Create2 factories for deterministic contract deployment
+Access Control: Role-based access control utilities
+Utility Libraries: Common helper functions and modifiers
 
-This workspace contains 3 directories:
+Contract Features
+Gas Optimized
+All contracts are written with gas optimization in mind:
 
-1. 'contracts': Holds three contracts with increasing levels of complexity.
-2. 'scripts': Contains four typescript files to deploy a contract. It is explained below.
-3. 'tests': Contains one Solidity test file for 'Ballot' contract & one JS test file for 'Storage' contract.
+Minimal bytecode footprint
+Efficient storage patterns
+Optimized function selectors
+Assembly optimizations where appropriate
 
-SCRIPTS
+Security Focused
 
-The 'scripts' folder has four typescript files which help to deploy the 'Storage' contract using 'web3.js' and 'ethers.js' libraries.
+Comprehensive input validation
+Reentrancy protection where needed
+Access control mechanisms
+Well-tested edge cases
 
-For the deployment of any other contract, just update the contract name from 'Storage' to the desired contract and provide constructor arguments accordingly 
-in the file `deploy_with_ethers.ts` or  `deploy_with_web3.ts`
+Standardized
 
-In the 'tests' folder there is a script containing Mocha-Chai unit tests for 'Storage' contract.
+Follows established patterns and conventions
+Compatible with common tooling
+Consistent interface design
+Comprehensive documentation
 
-To run a script, right click on file name in the file explorer and click 'Run'. Remember, Solidity file must already be compiled.
-Output from script will appear in remix terminal.
+Development
+Prerequisites
 
-Please note, require/import is supported in a limited manner for Remix supported modules.
-For now, modules supported by Remix are ethers, web3, swarmgw, chai, multihashes, remix and hardhat only for hardhat.ethers object/plugin.
-For unsupported modules, an error like this will be thrown: '<module_name> module require is not supported by Remix IDE' will be shown.
+Solidity ^0.8.0
+Foundry or Hardhat for compilation and testing
